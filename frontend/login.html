@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#D97757">
+  <meta name="description" content="Login Sparepart Management — aman, cepat, mobile-first untuk mekanik & admin.">
+  <title>Login - Sparepart Management</title>
+  <link rel="stylesheet" href="assets/css/app.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔧</text></svg>">
+</head>
+<body>
+  <div class="login-page">
+    <!-- Left Panel - Branding -->
+    <div class="login-left">
+      <div class="login-brand-icon">🔧</div>
+      <h1>Sparepart <span>Management</span></h1>
+      <p>Sistem manajemen sparepart mesin yang lembut di mata, cepat, dan nyaman dipakai di lapangan.</p>
+      <div class="login-pills">
+        <div class="login-pill"><strong>Zero-Cost</strong><small>Infrastruktur</small></div>
+        <div class="login-pill"><strong>Real-Time</strong><small>Monitoring Stok</small></div>
+        <div class="login-pill"><strong>Mobile</strong><small>First Design</small></div>
+      </div>
+    </div>
+
+    <!-- Right Panel - Login Form -->
+    <div class="login-right">
+      <div class="login-form-container fade-in">
+        <h2>Selamat Datang 👋</h2>
+        <p class="subtitle">Masuk ke akun Anda untuk melanjutkan</p>
+        <div class="api-status" id="apiStatus"><span class="dot"></span><span>Mengecek koneksi server…</span></div>
+
+        <form id="loginForm" onsubmit="handleLogin(event)">
+          <div class="form-group">
+            <label for="email">Email</label>
+            <div class="form-input-icon">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 4l-10 8L2 4"/></svg>
+              <input type="email" id="email" class="form-input" placeholder="nama@workshop.com" required autocomplete="email">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password</label>
+            <div class="form-input-icon">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <input type="password" id="password" class="form-input" placeholder="Masukkan password" required>
+              <button type="button" class="toggle-pass" onclick="togglePassword()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem">
+            <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.875rem; color:var(--gray-600); cursor:pointer">
+              <input type="checkbox" id="rememberMe" checked style="width:16px; height:16px; accent-color:var(--primary)">
+              Ingat saya
+            </label>
+            <a href="#" style="font-size:0.875rem; color:var(--primary); text-decoration:none; font-weight:500">Lupa password?</a>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block btn-lg" id="loginBtn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+            Masuk
+          </button>
+        </form>
+
+        <div style="margin-top:2rem; padding-top:1.5rem; border-top:1px solid var(--gray-200)">
+          <p style="font-size:0.8125rem; color:var(--gray-500); text-align:center; margin-bottom:1rem">Akun demo</p>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem">
+            <button class="btn btn-outline btn-sm" onclick="fillDemo('admin@workshop.com','admin123')" style="font-size:0.8rem">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              Admin
+            </button>
+            <button class="btn btn-outline btn-sm" onclick="fillDemo('budi@workshop.com','budi123')" style="font-size:0.8rem">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+              Mekanik
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="assets/js/app.js"></script>
+  <script>
+    function togglePassword() {
+      const pw = document.getElementById('password');
+      pw.type = pw.type === 'password' ? 'text' : 'password';
+    }
+
+    async function paintApiStatus() {
+      const el = document.getElementById('apiStatus');
+      if (!el) return;
+      const ok = await checkApiHealth().catch(() => false);
+      // fetch /health tanpa auth akan 404/200 tergantung route; anggap reachable bila tidak network-error
+      el.classList.remove('online', 'offline');
+      if (ok) {
+        el.classList.add('online');
+        el.innerHTML = '<span class="dot"></span><span>Server terhubung</span>';
+      } else {
+        // Jangan menakut-nakuti: tetap tampil netral bila API belum ada /health di prod lama
+        el.innerHTML = '<span class="dot"></span><span>Mode offline-tolerant — login tetap dicoba</span>';
+      }
+    }
+    paintApiStatus();
+
+    function fillDemo(email, password) {
+      document.getElementById('email').value = email;
+      document.getElementById('password').value = password;
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const btn = document.getElementById('loginBtn');
+
+      btn.disabled = true;
+      btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite"><circle cx="12" cy="12" r="10"/></svg> Memproses...';
+
+      try {
+        const data = await apiLogin(email, password);
+        showToast(`Selamat datang, ${data.user.name}!`, 'success');
+        setTimeout(() => {
+          window.location.href = data.user.role === 'admin' ? 'dashboard.html' : 'catalog.html';
+        }, 500);
+      } catch (err) {
+        showToast(err.message || 'Email atau password salah!', 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg> Masuk';
+      }
+    }
+
+    // Check if already logged in
+    const saved = localStorage.getItem('currentUser');
+    const token = localStorage.getItem('auth_token');
+    if (saved && token) {
+      const u = JSON.parse(saved);
+      if (u.role === 'admin') window.location.href = 'dashboard.html';
+      else window.location.href = 'catalog.html';
+    }
+  </script>
+  <style>
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</body>
+</html>

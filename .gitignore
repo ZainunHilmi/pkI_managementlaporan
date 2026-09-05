@@ -1,0 +1,19 @@
+# === Generated / local-only (jangan push) ===
+graphify-out/
+.opencode/
+*.log
+npm-debug.log*
+Thumbs.db
+.DS_Store
+
+# === Backend Laravel (double-guard, selain backend/.gitignore) ===
+backend/.env
+backend/.env.backup
+backend/.env.production
+backend/vendor/
+backend/node_modules/
+backend/database/*.sqlite*
+backend/public/storage/
+backend/public/build/
+backend/public/hot/
+backend/storage/*.key

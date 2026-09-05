@@ -1,0 +1,55 @@
+# Blueprint deploy ke Render (SQLite + disk persisten, tanpa ubah kode).
+# Cara pakai: push repo ini → Render Dashboard → New → Blueprint → pilih repo.
+# PENTING setelah deploy pertama:
+#   1. Ganti APP_URL & FRONTEND_URL dengan URL onrender.com aslimu.
+#   2. Data admin contoh ikut ter-seed otomatis saat build pertama
+#      (admin@workshop.com / admin123 — SEGERA ganti password setelah live!).
+#   3. Jangan commit file .env — isi secret via Render Dashboard → Environment.
+
+services:
+  - type: web
+    name: management-sparepart
+    runtime: php
+    rootDir: backend
+    plan: free
+    buildCommand: |-
+      composer install --no-dev --optimize-autoloader
+      mkdir -p storage/app/public/spareparts
+      touch storage/database.sqlite
+      php artisan migrate --force
+      php artisan db:seed --force || true
+      php artisan storage:link
+      php artisan config:cache
+      php artisan route:cache
+    startCommand: php artisan serve --host=0.0.0.0 --port=$PORT
+    disk:
+      name: app-data
+      mountPath: /opt/render/project/src/backend/storage
+      sizeGB: 1
+    envVars:
+      - key: APP_NAME
+        value: Sparepart Management
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_URL
+        value: https://management-sparepart.onrender.com
+      - key: FRONTEND_URL
+        value: https://management-sparepart.onrender.com
+      - key: APP_KEY
+        generateValue: true
+      - key: DB_CONNECTION
+        value: sqlite
+      - key: DB_DATABASE
+        value: /opt/render/project/src/backend/storage/database.sqlite
+      - key: SESSION_DRIVER
+        value: database
+      - key: CACHE_STORE
+        value: database
+      - key: QUEUE_CONNECTION
+        value: database
+      - key: FILESYSTEM_DISK
+        value: public
+      - key: LOG_CHANNEL
+        value: stderr

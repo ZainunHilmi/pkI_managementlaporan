@@ -72,6 +72,10 @@
           <h1 class="topbar-title">Log Transaksi</h1>
         </div>
         <div class="topbar-right">
+          <button class="btn btn-outline btn-sm" id="exportBtn" onclick="openExportModal()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export Excel
+          </button>
           <button class="btn btn-primary btn-sm" id="addTxBtn" onclick="openAddTxModal()">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Tambah Transaksi
@@ -121,6 +125,66 @@
         </div>
       </div>
     </main>
+  </div>
+
+  <!-- Export Excel Modal -->
+  <div class="modal-overlay" id="exportModal">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title">Export Laporan Excel</span>
+        <button class="modal-close" onclick="closeModal('exportModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Rentang Waktu</label>
+          <div class="toolbar" style="margin:0" role="radiogroup" aria-label="Rentang waktu export">
+            <button class="chip" data-preset="today" onclick="setExportPreset('today', this)">Hari Ini</button>
+            <button class="chip active" data-preset="week" onclick="setExportPreset('week', this)">7 Hari</button>
+            <button class="chip" data-preset="month" onclick="setExportPreset('month', this)">30 Hari</button>
+            <button class="chip" data-preset="all" onclick="setExportPreset('all', this)">Semua</button>
+            <button class="chip" data-preset="custom" onclick="setExportPreset('custom', this)">Custom</button>
+          </div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem" id="export-custom-range" hidden>
+          <div class="form-group">
+            <label>Dari Tanggal *</label>
+            <input type="date" class="form-input" id="expFrom" onchange="refreshExportPreview()">
+          </div>
+          <div class="form-group">
+            <label>Sampai Tanggal *</label>
+            <input type="date" class="form-input" id="expTo" onchange="refreshExportPreview()">
+          </div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem">
+          <div class="form-group">
+            <label>Tipe Transaksi</label>
+            <select class="form-select" id="expType" onchange="refreshExportPreview()">
+              <option value="all">Semua</option>
+              <option value="in">Barang Masuk</option>
+              <option value="out">Barang Keluar</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Opsi</label>
+            <label style="display:flex; align-items:center; gap:0.5rem; font-weight:500; text-transform:none; letter-spacing:0; font-size:0.9rem">
+              <input type="checkbox" id="expImages" checked onchange="refreshExportPreview()">
+              Sertakan foto (thumbnail)
+            </label>
+            <div style="font-size:0.75rem; color:var(--gray-400); margin-top:0.25rem">File berisi 3 sheet: Ringkasan, Detail Transaksi, Stok Terkini.</div>
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <div id="export-preview" style="font-size:0.85rem; color:var(--gray-500); background:var(--gray-100); border-radius:0.5rem; padding:0.6rem 0.8rem">Memuat pratinjau…</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeModal('exportModal')">Batal</button>
+        <button class="btn btn-primary" id="exportDlBtn" onclick="downloadExport()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download .xlsx
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- Add Transaction Modal -->
@@ -183,6 +247,7 @@
         const bn = document.getElementById('bn-dashboard');
         if (bn) bn.style.display = 'none';
         document.getElementById('addTxBtn').style.display = 'none';
+        document.getElementById('exportBtn').style.display = 'none';
       }
     }
     document.getElementById('tx-search')?.addEventListener('input', debounce((e) => filterTable('tx-search', 'tx-table'), 200));
@@ -280,6 +345,105 @@
         renderTxTable(currentTxFilter);
       } catch (e) {
         showToast(e.message || 'Gagal mencatat transaksi', 'error');
+      }
+    }
+
+    // ---- Export Excel ----
+    let exportPreset = 'week';
+
+    function exportQuery() {
+      const p = new URLSearchParams({
+        preset: exportPreset,
+        type: document.getElementById('expType').value,
+        include_images: document.getElementById('expImages').checked ? '1' : '0',
+      });
+      if (exportPreset === 'custom') {
+        p.set('from', document.getElementById('expFrom').value);
+        p.set('to', document.getElementById('expTo').value);
+      }
+      return p.toString();
+    }
+
+    function setExportPreset(preset, el) {
+      exportPreset = preset;
+      document.querySelectorAll('#exportModal .chip').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+      document.getElementById('export-custom-range').hidden = preset !== 'custom';
+      refreshExportPreview();
+    }
+
+    function openExportModal() {
+      const today = new Date().toISOString().slice(0, 10);
+      const weekAgo = new Date(Date.now() - 6 * 864e5).toISOString().slice(0, 10);
+      if (!document.getElementById('expFrom').value) document.getElementById('expFrom').value = weekAgo;
+      if (!document.getElementById('expTo').value) document.getElementById('expTo').value = today;
+      openModal('exportModal');
+      refreshExportPreview();
+    }
+
+    async function refreshExportPreview() {
+      const box = document.getElementById('export-preview');
+      const btn = document.getElementById('exportDlBtn');
+      if (exportPreset === 'custom') {
+        const f = document.getElementById('expFrom').value;
+        const t = document.getElementById('expTo').value;
+        if (!f || !t) { box.textContent = 'Pilih tanggal mulai & sampai terlebih dahulu.'; btn.disabled = true; return; }
+        if (f > t) { box.textContent = 'Tanggal mulai tidak boleh setelah tanggal sampai.'; btn.disabled = true; return; }
+      }
+      box.textContent = 'Memuat pratinjau…';
+      btn.disabled = true;
+      try {
+        const data = await apiRequest(`/exports/preview?${exportQuery()}`);
+        const withImg = document.getElementById('expImages').checked;
+        const limit = withImg ? data.limit_with_images : data.limit_no_images;
+        let html = `${formatNumber(data.transactions)} transaksi • ${formatNumber(data.parts)} jenis part akan di-export.`;
+        if (data.transactions > limit) {
+          html += withImg
+            ? `<br>⚠️ Melebihi batas ${formatNumber(limit)} baris dengan foto — persempit tanggal atau matikan opsi foto.`
+            : `<br>⚠️ Melebihi batas ${formatNumber(limit)} baris — persempit rentang tanggal.`;
+          box.innerHTML = html;
+          box.style.color = 'var(--danger-deep)';
+          return;
+        }
+        if (withImg && data.transactions > 300) {
+          html += '<br>ℹ️ Ratusan foto: file agak besar & unduhan butuh beberapa detik.';
+        }
+        box.innerHTML = html;
+        box.style.color = '';
+        btn.disabled = false;
+      } catch (e) {
+        box.textContent = e.message || 'Gagal memuat pratinjau';
+      }
+    }
+
+    async function downloadExport() {
+      const btn = document.getElementById('exportDlBtn');
+      btn.disabled = true;
+      const original = btn.innerHTML;
+      btn.innerHTML = 'Menyusun Excel…';
+      try {
+        const res = await fetch(`${API_BASE}/exports/excel?${exportQuery()}`, { headers: { ...getAuthHeaders() } });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.message || `Gagal export (${res.status})`);
+        }
+        const blob = await res.blob();
+        const cd = res.headers.get('content-disposition') || '';
+        const m = cd.match(/filename="?([^";]+)"?/);
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = m ? m[1] : 'Laporan-Sparepart.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+        closeModal('exportModal');
+        showToast('File Excel berhasil diunduh!', 'success');
+      } catch (e) {
+        showToast(e.message || 'Gagal mengunduh Excel', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = original;
       }
     }
 

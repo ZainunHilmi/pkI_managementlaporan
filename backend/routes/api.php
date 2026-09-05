@@ -6,6 +6,7 @@ use App\Http\Controllers\SparepartController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ExportController;
 
 // Public routes
 Route::post('/login', [AuthController::class, 'login']);
@@ -45,6 +46,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Transaction CRUD (admin can add stock-in/out)
         Route::post('/transactions', [TransactionController::class, 'store']);
+
+        // Excel export (admin only)
+        Route::get('/exports/preview', [ExportController::class, 'preview']);
+        Route::get('/exports/excel', [ExportController::class, 'excel']);
     });
 
     // Mechanic can take parts (stock out only)

@@ -343,6 +343,11 @@ body {
   box-shadow: inset 0 0 0 1px rgba(255,255,255,0.6);
 }
 .sidebar-link svg { width: 20px; height: 20px; flex-shrink: 0; }
+.sidebar-profile-top {
+  padding: 1rem 1.1rem;
+  border-bottom: 1px solid var(--border-soft);
+  background: linear-gradient(to bottom, var(--primary-soft), var(--primary-mist));
+}
 .sidebar-footer {
   padding: 1rem 1.1rem;
   border-top: 1px solid var(--border-soft);

@@ -11,15 +11,11 @@
     window.APP_CONFIG = { API_BASE: override };
     return;
   }
-  // Same-origin /api bila frontend diserve Laravel (prod Render),
-  // fallback ke localhost saat dev Live Server / file://
-  const sameOriginApi = `${window.location.origin}/api`;
-  const isLocalHost = ['localhost', '127.0.0.1', ''].includes(window.location.hostname);
-  const def = isLocalHost ? 'http://localhost:8000/api' : sameOriginApi;
-  window.APP_CONFIG = { API_BASE: def };
+  // Backend DomCloud (decoupled from Vercel frontend)
+  window.APP_CONFIG = { API_BASE: 'https://hairy-lie-mis.sgp.dom.my.id/api' };
 })();
 
-const API_BASE = (window.APP_CONFIG && window.APP_CONFIG.API_BASE) || 'http://localhost:8000/api';
+const API_BASE = (window.APP_CONFIG && window.APP_CONFIG.API_BASE) || 'https://hairy-lie-mis.sgp.dom.my.id/api';
 
 // ---- API HELPERS ----
 function getAuthHeaders(isMultipart = false) {

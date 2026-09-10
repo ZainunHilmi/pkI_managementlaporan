@@ -1,0 +1,23 @@
+import type { DefaultSession } from "next-auth";
+
+// Augmentasi tipe next-auth agar session.user dan JWT membawa id + role (SRS §5.1).
+declare module "next-auth" {
+  interface Session {
+    user: {
+      id: string;
+      role: "ADMIN" | "USER";
+    } & DefaultSession["user"];
+  }
+
+  interface User {
+    id: string;
+    role: "ADMIN" | "USER";
+  }
+}
+
+declare module "next-auth/jwt" {
+  interface JWT {
+    id?: string;
+    role?: "ADMIN" | "USER";
+  }
+}

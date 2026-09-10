@@ -6,6 +6,9 @@ npm-debug.log*
 Thumbs.db
 .DS_Store
 
+# File catatan API key lokal (jangan push)
+ini api key.txt
+
 # === Backend Laravel (double-guard, selain backend/.gitignore) ===
 backend/.env
 backend/.env.backup

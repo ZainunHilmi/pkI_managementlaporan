@@ -3,25 +3,91 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f6f7fb;
+  --foreground: #0f172a;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Zoom-in ringan global: 16px → 17px (+6%). Seluruh UI memakai rem
+   (Tailwind), jadi semua halaman membesar proporsional sedikit.
+   Ubah angka ini saja untuk mengatur level zoom. */
+html {
+  font-size: 106.25%;
 }
 
 body {
   color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  background:
+    radial-gradient(60rem 30rem at 85% -10%, rgba(99, 102, 241, 0.08), transparent 60%),
+    radial-gradient(50rem 26rem at -10% 0%, rgba(45, 212, 191, 0.08), transparent 60%),
+    var(--background);
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: #c7d2fe;
+  color: #1e1b4b;
+}
+
+/* Fokus keyboard yang konsisten dan lembut */
+:focus-visible {
+  outline: 2px solid #818cf8;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Scrollbar ramping */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 8px;
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+}
+
+/* Zoom per area — properti `zoom` memperbesar isi beserta layout-nya
+   (lebih tepat daripada transform: scale yang meluber). Nilai ini
+   menumpuk di atas zoom global html 106.25%. Ubah angkanya sesuai selera:
+   1.05 = +5%, 1.08 = +8%. */
+.zoom-admin {
+  zoom: 1.05; /* isi panel admin */
+}
+.zoom-user {
+  zoom: 1.05; /* isi panel user/teknisi */
+}
+.zoom-auth {
+  zoom: 1.08; /* kartu login/signup */
+}
+
+/* Keterbacaan global: setiap teks subheadline/deskripsi sekunder
+   (abu-abu slate-400/500: judul seksi kartu, deskripsi PageHeader,
+   hint, header tabel, dsb.) dibuat hitam pekat di semua halaman. */
+.text-slate-400,
+.text-slate-500 {
+  color: var(--foreground);
+}
+
+/* Hormati pengguna yang mematikan animasi */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up,
+  .animate-fade-in,
+  .animate-pop-in {
+    animation: none !important;
+  }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
   }
 }

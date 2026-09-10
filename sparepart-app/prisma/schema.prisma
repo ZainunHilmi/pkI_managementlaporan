@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "cockroachdb"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String // bcrypt hash
+  role      Role     @default(USER)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  spareParts   Sparepart[]
+  stockHistory StockHistory[]
+
+  @@map("users")
+}
+
+model Sparepart {
+  id          String   @id @default(cuid())
+  nama        String
+  jumlahStock Int      @default(0)
+  lokasi      String
+  deskripsi   String
+  gambar      String[] // array URL publik dari ImgBB (max 2)
+  threshold   Int      @default(5) // batas minimum stok
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  createdById  String
+  createdBy    User           @relation(fields: [createdById], references: [id])
+  stockHistory StockHistory[]
+
+  @@map("spareparts")
+}
+
+model StockHistory {
+  id          String    @id @default(cuid())
+  sparepartId String
+  sparepart   Sparepart @relation(fields: [sparepartId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  type        StockType // MASUK atau KELUAR
+  jumlah      Int
+  keterangan  String?
+  createdAt   DateTime  @default(now())
+
+  @@map("stock_history")
+}
+
+enum StockType {
+  MASUK
+  KELUAR
+}

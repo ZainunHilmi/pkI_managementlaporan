@@ -16,7 +16,10 @@ function createClient() {
 
 export const prisma = globalForPrisma.prisma ?? createClient();
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+// Simpan ke global di semua env (termasuk production/Vercel) agar
+// container serverless yang di-reuse tidak bikin client + pool baru
+// tiap invocation → hemat koneksi CockroachDB.
+if (!globalForPrisma.prisma) globalForPrisma.prisma = prisma;
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 

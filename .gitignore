@@ -9,6 +9,9 @@ Thumbs.db
 # File catatan API key lokal (jangan push)
 ini api key.txt
 
+# Arsip lokal, jangan push ke Vercel/GitHub (bikin deploy bengkak)
+backup-legacy/
+
 # === Backend Laravel (double-guard, selain backend/.gitignore) ===
 backend/.env
 backend/.env.backup

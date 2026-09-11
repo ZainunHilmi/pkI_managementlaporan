@@ -36,6 +36,20 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
+    // Pengaman: izinkan callback URL absolut ke *.vercel.app (domain
+    // production) walau NEXTAUTH_URL lupa diganti dari localhost.
+    // Path relatif tetap di-resolve terhadap baseUrl seperti default.
+    async redirect({ url, baseUrl }) {
+      try {
+        const target = url.startsWith("/") ? new URL(url, baseUrl) : new URL(url);
+        if (/\.vercel\.app$/.test(target.hostname)) return target.toString();
+        if (target.origin === baseUrl) return target.toString();
+      } catch {
+        /* abaikan, fallback ke baseUrl di bawah */
+      }
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      return baseUrl;
+    },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;

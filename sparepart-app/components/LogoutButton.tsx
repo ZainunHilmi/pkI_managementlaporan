@@ -4,9 +4,18 @@ import { signOut } from "next-auth/react";
 import type { Tone } from "@/components/ui";
 
 export default function LogoutButton({ tone = "indigo" }: { tone?: Tone }) {
+  async function handleLogout() {
+    // Jangan pakai callbackUrl: NextAuth me-resolve path relatif ("/login")
+    // terhadap NEXTAUTH_URL di server. Kalau env itu masih localhost di
+    // Vercel, user nyasar ke http://localhost:3000/login.
+    // redirect:false + navigasi manual selalu ikut domain aktif.
+    await signOut({ redirect: false });
+    window.location.href = "/login";
+  }
+
   return (
     <button
-      onClick={() => signOut({ callbackUrl: "/login" })}
+      onClick={handleLogout}
       className={`inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-sm font-medium text-slate-600 shadow-sm transition-all duration-200 hover:border-slate-300 hover:text-slate-900 active:scale-[0.97] ${
         tone === "indigo" ? "hover:bg-indigo-50/50" : "hover:bg-teal-50/50"
       }`}
